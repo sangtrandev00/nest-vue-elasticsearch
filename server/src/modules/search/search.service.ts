@@ -69,6 +69,9 @@ export class SearchService {
                 },
             );
             const body = await this.parseAndPrepareData();
+
+            console.log('body', body);
+
             this.esService.bulk(
                 {
                     index: this.configService.get('ELASTICSEARCH_INDEX'),
@@ -84,6 +87,8 @@ export class SearchService {
     }
 
     async search(search: string) {
+        console.log('search', search);
+
         let results = [];
         const { body } = await this.esService.search({
             index: this.configService.get('ELASTICSEARCH_INDEX'),
@@ -98,8 +103,11 @@ export class SearchService {
                 },
             },
         });
+
+        console.log('body', body);
+
         const hits = body.hits.hits;
-        hits.map(item => {
+        hits.map((item) => {
             results.push(item._source);
         });
 
@@ -109,9 +117,12 @@ export class SearchService {
     async parseAndPrepareData() {
         let body = [];
         const listMovies: MoviesJsonResponse[] = moviesJson;
+
+        console.log('object', listMovies);
+
         listMovies.map((item, index) => {
             let actorsData = [];
-            item.cast.map(actor => {
+            item.cast.map((actor) => {
                 const splited = actor.split(' ');
                 actorsData.push({ firstName: splited[0], lastName: splited[1] });
             });
@@ -121,7 +132,7 @@ export class SearchService {
                 {
                     title: item.title,
                     year: item.year,
-                    genres: item.genres.map(genre => ({ genre })),
+                    genres: item.genres.map((genre) => ({ genre })),
                     actors: actorsData,
                 },
             );

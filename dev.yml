@@ -2,7 +2,9 @@ version: "3.7"
 
 services:
   nest-app:
-    build: server
+    build: 
+      context: ./server  # Ensure this points to the correct directory
+      dockerfile: Dockerfile  # Ensure this points to the correct Dockerfile
     container_name: nest-app
     healthcheck:
       test: ["CMD-SHELL", "curl --silent --fail localhost:3000/api/healthcheck || exit 1"]
@@ -18,7 +20,7 @@ services:
       - 3000:3000
   nest-elasticsearch:
     container_name: nest-elasticsearch
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.0.1
+    image: elasticsearch:8.0.0  # Updated to use Docker Hub image
     healthcheck:
       test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cat/health?h=st || exit 1"]
       interval: 50s
@@ -29,13 +31,15 @@ services:
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - discovery.type=single-node
+      - network.host=0.0.0.0  # Add this line
     ports:
       - 9300:9300
       - 9200:9200
   nest-vue:
     build:
-      target: 'develop-stage'
-      context: client
+      # target: 'develop-stage'
+      context: ./client  # Ensure this points to the correct directory
+      dockerfile: Dockerfile  # Ensure this points to the correct Dockerfile
     container_name: nest-vue
     volumes:
       - ./client:/app/client
